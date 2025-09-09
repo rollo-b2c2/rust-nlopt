@@ -1,4 +1,14 @@
+extern crate pkg_config;
+
 fn main() {
+
+    let force_pkg = std::env::var_os("NLOPT_SYS_USE_PKG_CONFIG").is_some();
+    if force_pkg || pkg_config::Config::new().atleast_version("2.9.1").probe("nlopt").is_ok() {
+        println!("cargo:rerun-if-env-changed=NLOPT_SYS_USE_PKG_CONFIG");
+        println!("cargo:rerun-if-env-changed=PKG_CONFIG_PATH");
+        return;
+    }
+
     let dst = cmake::Config::new("./nlopt-2.9.1")
         .define("BUILD_SHARED_LIBS", "OFF")
         .define("NLOPT_CXX", "OFF")
